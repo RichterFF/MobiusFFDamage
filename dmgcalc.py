@@ -11,16 +11,6 @@ ElementNames = ["Neutral", "Fire", "Water", "Wind", "Earth", "Light", "Dark"]
 Warrior=0; Mage=1; Ranger=2; Monk=3; Meia=4; Sarah=5; Sophie=6; Graff=7
 TypeNames = ["Warrior", "Ranger", "Monk", "Meia", "Sarah", "Sophie", "Graff"]
 
-def OppositeElement(element):
-    if element == Fire: return Water
-    if element == Water: return Fire
-    if element == Wind: return Earth
-    if element == Earth: return Wind
-    if element == Light: return Dark
-    if element == Dark: return Light
-    return Neutral
-
-
 class Abilities:  # including fractals
     def __init__(self):
         self.elementEnhance = [0, 0, 0, 0, 0, 0, 0] 
@@ -319,19 +309,6 @@ class Job:
         print(self.JobString())
 
 
-
-
-# weapon stats folded into job
-#class Weapon:  
-#    def __init__(self):
-#        self.attack = 0
-#        self.breakPower = 0
-#        self.magic = 0
-#        self.critStars = 3
-#
-#        self.abilities = Abilities()
-
-
 class AbilityCard:
     def __init__(self, attack=0, breakPower=0, critStars=0, element=Neutral, area=False, \
                     jobType=''):
@@ -395,7 +372,7 @@ class Monster:
 # boost = 100%; enelment = 30%; BDD = 50%
 
 
-def weaknessElement(element):
+def WeaknessElement(element):
   if element==Fire: return Water
   if element==Water: return Fire
   if element==Wind: return Earth
@@ -406,7 +383,7 @@ def weaknessElement(element):
 
 
 def cardDamage(job, card, monster, startingBuffs, status, wpn=[], debug=0):
-# assume auto abilities on cards are already counted in job abilities
+# assume custom panels and card fractals are accounted for in job stats
 
     debuffs = copy.deepcopy(monster.debuffs)
     skills = copy.deepcopy(card.skills)
@@ -425,14 +402,13 @@ def cardDamage(job, card, monster, startingBuffs, status, wpn=[], debug=0):
     magic = 1.0
     if card.jobtype in job.lore:
         magic = 1 + job.magic/100
-    if not job.elements[card.element]: magic = 0
+    if not job.elements[card.element]: magic = 0 # to filter out jobs that can't use this card
  
-
     if job.isMeia and skills.meiaSynchro: 
         magic = magic * 1.1 
     if buffs.faith: magic = magic * 1.5
     if buffs.trance: magic = magic * 1.3
-    if wpn: magic = magic + wpn.magic
+    if wpn: magic = magic + wpn.magic  # weapon's magic applied after modifiers
 
     # element Damage
     elementFactor = 1 + abilities.elementEnhance[card.element]/100
@@ -460,7 +436,7 @@ def cardDamage(job, card, monster, startingBuffs, status, wpn=[], debug=0):
     if critChance > 1: critChance = 1
 
     # weakness
-    weakness = (card.element == weaknessElement(monster.element))
+    weakness = (card.element == WeaknessElement(monster.element))
     if weakness:
         weaknessFactor = 2 + abilities.exploitWeakness/100;
         if debuffs.weaken: 
@@ -474,7 +450,7 @@ def cardDamage(job, card, monster, startingBuffs, status, wpn=[], debug=0):
     else:
         brokenFactor = 1
 
-    # extra factors
+    # extra factors (I think these are multiplicative, but I don't know for sure)
     extraFactor = 1
     if monster.broken and weakness and skills.breakExploiter: 
         extraFactor = extraFactor * 1.25
@@ -502,7 +478,8 @@ def cardDamage(job, card, monster, startingBuffs, status, wpn=[], debug=0):
     if debuffs.unguard or monster.broken:
         defense = 0
     elif skills.critRupture:
-        defense = max(0, defense - 0.2)
+        # this may not be accurate: defense might actually go below 0?
+        defense = max(0, defense - 0.2) 
     defenseFactor = 1 - defense
 
     baseDamage = card.attack * magic * elementFactor * weaknessFactor \
