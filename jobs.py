@@ -37,7 +37,7 @@ def loadJobs(filename = ""):
         if "Warrior" in jobtype or "Graff" in jobtype: joblore = [Warrior]
         if "Mage" in jobtype or "Meia" in jobtype: joblore = [Mage]
         if "Ranger" in jobtype or "Sarah" in jobtype: joblore = [Ranger]
-        if "Monk" in jobtype or "Sophie" in jobtype: lore = [Ranger]
+        if "Monk" in jobtype or "Sophie" in jobtype: lore = [Monk]
 
         lore = row[0]
         if "Mage" in lore: joblore.append(Mage)
