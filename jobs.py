@@ -1,7 +1,6 @@
-import xlrd
-#import csv
 from dmgcalc import *
-import pdb
+from loadSheetCSV import loadSheet
+#from loadSheetXL import loadSheet
 import re
 
 
@@ -16,18 +15,15 @@ import re
 #  29        30       31        32      33      34     35     36        37
 # expWeak | painB | iCrit | abChain | pierce | flash | qb | scourge | sguard
 
-def loadJobs(filename = ""):
-    """ Load job list from spreadsheet """
-    if filename == "": filename = "jobstats.xlsx"
-    wb = xlrd.open_workbook(filename)
-    sheet = wb.sheet_by_index(0)
 
+def loadJobs(filename = ""):
+    sheet = loadSheet(filename)
     jobList = []
-    for ii in range(2,sheet.nrows):
-        row = sheet.row_values(ii) 
+    for ii in range(2,len(sheet)):
+        row = sheet[ii]
         name = row[2]; 
-        [atk,brk,mag, critStar] = row[4:8]
-        if critStar == '': critStar = 0
+        if row[7] == '': row[7] = 0 # crit stars
+        [atk,brk,mag, critStar] = [int(x) for x in row[4:8]]
         lbreak = (row[40] == 1)
         job = Job(name, atk, mag, brk, critStar, lbreak)
 
@@ -54,10 +50,6 @@ def loadJobs(filename = ""):
         job.elements[Dark]  = 'D' in orbs
         job.elements[Light] = 'L' in orbs
         
-        for jj in range(16,22): 
-            if (row[jj] == ''): row[jj]=0
-        for jj in range(29,38): 
-            if (row[jj] == ''): row[jj]=0
         job.abilities.EnhanceFire(row[16])
         job.abilities.EnhanceWater(row[17])
         job.abilities.EnhanceWind(row[18])
@@ -69,9 +61,9 @@ def loadJobs(filename = ""):
         job.abilities.PainfulBreak(row[30])
         job.abilities.ImprovedCrit(row[31])
         job.abilities.AbilityChain(row[32])
+        job.abilities.Scourge(row[36])
 
         jobList.append(job)
-        #pdb.set_trace()
 
     return jobList
 

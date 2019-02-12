@@ -44,7 +44,7 @@ class Abilities:  # including fractals
     def Ravage(self, value): self.ravage = value
 
     def addAbilities(self, abilities):
-        for ii in range(3): 
+        for ii in range(7): 
             self.elementEnhance[ii] = self.elementEnhance[ii] \
                                     + abilities.elementEnhance[ii]
         self.attackUp = self.attackUp + abilities.attackUp
@@ -302,7 +302,7 @@ class Job:
 
         abstr = self.abilities.AbilString()
         if abstr: jobstr = jobstr + "\n" + abstr
-        if self.attackLimitBreak: jobstr = jobstr + " Attack Limit Broken"
+        if self.attackLimitBreak: jobstr = jobstr + " \n Attack Limit Broken"
         return jobstr
 
     def display(self):
