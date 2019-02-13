@@ -23,7 +23,7 @@ def loadSheet(filename = ""):
     jobData.append(sheet.row_values(1))
 
     # set null values to 0 for numerical parameters
-    for ii in range(2,len(sheet)):
+    for ii in range(2,sheet.nrows):
         row = sheet.row_values(ii)
         for jj in range(7,10): 
             if (row[jj] == ''): row[jj]=0  # crit/spd/def stars
