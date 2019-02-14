@@ -87,11 +87,11 @@ class Weapon:
         self.appliedBonus = Abilities()
 
     def WpnString(self):
-        wpnstr = " Name: %s; attack %d; break %d; magic %d; crit* %d" % \
-            (self.name, self.attack, self.breakPower, self.magic, self.critStars)
+        wpnstr = "Name: %s; attack %d; break %d; magic %d; crit* %d" % \
+           (self.name, self.attack, self.breakPower, self.magic, self.critStars)
         bonusStr = self.appliedBonus.AbilString()
         if bonusStr:
-            wpnstr = wpnstr + "\n" + bonusStr
+            wpnstr = wpnstr + ';' + bonusStr
         return wpnstr
 
     def display(self):
@@ -284,7 +284,7 @@ class Job:
         self.critStars = critStars
         self.elements = [0, 0, 0, 0, 0, 0, 0]
         self.lore = []
-        self.weapon = Weapon()  # give it a blank weapon
+        self.weapon = Weapon(name="blank")  # give it a blank weapon
 
         self.isMeia = False
         self.abilities = Abilities()
@@ -308,7 +308,7 @@ class Job:
 
     def display(self):
         print(self.JobString())
-        print("Weapon: %s" % (self.weapon.WpnString()))
+        print(" Weapon: %s" % (self.weapon.WpnString()))
 
 
 class AbilityCard:
