@@ -1,10 +1,15 @@
 from dmgcalc import *
 from cards import *
+import copy
 
 
-def Rankings(joblist, card, weakness=True, broken=False, chain=True):
+def Rankings(joblist, card, weakness=True, broken=False, chain=True, dona=False):
     ''' Calculate job rankings for a given card '''
-    blank = Weapon()  # assume a blank weapon with no abilities or stats
+    joblist = copy.deepcopy(joblist) # make a copy of joblist
+    # make sure each job has a "blank" (0 stats, no buffs) weapon
+    blank = Weapon()
+    for job in joblist: job.weapon = blank
+
     buffs = Buffs()  # no active buffs
     status = CurrentStatus(health=100, ultGauge=100, orbs=16)
     if weakness:
@@ -16,10 +21,16 @@ def Rankings(joblist, card, weakness=True, broken=False, chain=True):
     monster.broken=broken
     status.ability = chain
     status.attuned = chain
+    status.dona = dona
+    rankings = RankJobs(joblist, card, buffs, status, monster)
+    return rankings
+
+def RankJobs(joblist, card, buffs, status, monster):
+    '''Calculate job (& wpn) rankings given: card, buffs, monster, & status'''
     rankings = [];
     for job in joblist:
         # [non-crit, weighted avg, crit]
-        [ncr,av,cr] = cardDamage(job, card, monster, buffs, status, wpn=blank)
+        [ncr,av,cr] = cardDamage(job, card, monster, buffs, status)
         rankings.append([ncr, av, cr, job.name])
 
     rankings = sorted(rankings, key=lambda x: -x[2]) # sort on crit damage

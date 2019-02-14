@@ -284,6 +284,7 @@ class Job:
         self.critStars = critStars
         self.elements = [0, 0, 0, 0, 0, 0, 0]
         self.lore = []
+        self.weapon = Weapon()  # give it a blank weapon
 
         self.isMeia = False
         self.abilities = Abilities()
@@ -307,6 +308,7 @@ class Job:
 
     def display(self):
         print(self.JobString())
+        print("Weapon: %s" % (self.weapon.WpnString()))
 
 
 class AbilityCard:
@@ -339,12 +341,14 @@ class AbilityCard:
         if debuffString: print(" " + debuffString)
 
 class CurrentStatus:
-    def __init__(self, health=100, ultGauge=100, orbs=16, ability=True, attuned=True):
+    def __init__(self, health=100, ultGauge=100, orbs=16, ability=True, \
+            attuned=True, dona=False):
         self.health = health        # health percentage from 0 to 100
         self.ultGauge = ultGauge    # ultmate gauge percentage from 0 to 100
         self.orbs = orbs            # number of orbs from 0 to 16
         self.ability = ability      # ability chain active?
         self.attuned = attuned      # attuned chain active?
+        self.dona = dona            # have Dona & Barthello in deck?
 
     def display(self):
         print('Status: health %d; ult %d; orbs %d, abilty %d; attuned %d' %
@@ -382,25 +386,33 @@ def WeaknessElement(element):
   return -1  # neutral: no weakness
 
 
-def cardDamage(job, card, monster, startingBuffs, status, wpn=[], debug=0):
+def cardDamage(job, card, monster, startingBuffs, status, debug=0):
 # assume custom panels and card fractals are accounted for in job stats
+
 
     debuffs = copy.deepcopy(monster.debuffs)
     skills = copy.deepcopy(card.skills)
     abilities = copy.deepcopy(job.abilities)
-    critStars = job.critStars + card.critStars
-    if wpn: critStars = critStars + wpn.critStars
+    lore = copy.deepcopy(job.lore)
+
+    wpn = job.weapon
+    critStars = job.critStars + card.critStars + wpn.critStars
+    #job.display()
 
     # add effects of ability card
     buffs = copy.deepcopy(startingBuffs)
     buffs.addBuffs(card.appliedBuffs)
     debuffs.addDebuffs(card.appliedDebuffs)
     abilities.addAbilities(card.appliedBonus)
-    if wpn: abilities.addAbilities(wpn.appliedBonus)
+    abilities.addAbilities(wpn.appliedBonus)
+
+    if status.dona:
+        lore.append(Mage)
+        lore.append(Warrior)
 
     # magic modifier
     magic = 1.0
-    if card.jobtype in job.lore:
+    if card.jobtype in lore:
         magic = 1 + job.magic/100
     if not job.elements[card.element]: magic = 0 # to filter out jobs that can't use this card
  
@@ -408,7 +420,7 @@ def cardDamage(job, card, monster, startingBuffs, status, wpn=[], debug=0):
         magic = magic * 1.1 
     if buffs.faith: magic = magic * 1.5
     if buffs.trance: magic = magic * 1.3
-    if wpn: magic = magic + wpn.magic  # weapon's magic applied after modifiers
+    magic = magic + wpn.magic/100  # weapon's magic applied after modifiers
 
     # element Damage
     elementFactor = 1 + abilities.elementEnhance[card.element]/100
