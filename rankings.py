@@ -5,8 +5,9 @@ import copy
 
 def Rankings(joblist, card, weakness=True, broken=False, chain=True, dona=False):
     ''' Calculate job rankings for a given card '''
-    joblist = copy.deepcopy(joblist) # make a copy of joblist
     # make sure each job has a "blank" (0 stats, no buffs) weapon
+    # this means we have to use a separate copy of joblist
+    joblist = copy.deepcopy(joblist) 
     blank = Weapon()
     for job in joblist: job.weapon = blank
 
